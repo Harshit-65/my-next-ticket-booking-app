@@ -45,6 +45,7 @@ This project is a train booking system built using **Next.js**, **Node.js**, **E
    - Create a database named `ticket_booking_db`.
    - Run the database initialization script:
      ```
+     node init-db.js //to create the tables as per schema
      node scripts/initializeSeats.js
      ```
 4. Start the backend server:
