@@ -10,27 +10,16 @@ import { BookingForm } from "@/components/booking/booking-form";
 import { useBooking } from "@/hooks/use-booking";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
-
-interface Seat {
-  id: number;
-  seat_number: number;
-  row_number: number;
-  is_booked: boolean;
-}
-
-interface Booking {
-  id: number;
-  booking_time: string;
-  status: string;
-  seats: Array<Seat>;
-}
+import { Seat, Booking } from "@/types/booking";
 
 export default function BookingPage() {
   const {
     userBookings,
+    allBookedSeats,
     loading,
     loadAvailableSeats,
     loadUserBookings,
+    loadAllBookedSeats,
     bookSeats,
     cancelBooking,
   } = useBooking();
@@ -38,14 +27,19 @@ export default function BookingPage() {
   useEffect(() => {
     loadAvailableSeats();
     loadUserBookings();
-  }, [loadAvailableSeats, loadUserBookings]);
+    loadAllBookedSeats();
+  }, [loadAvailableSeats, loadUserBookings, loadAllBookedSeats]);
 
   const handleBooking = async (numberOfSeats: number) => {
     try {
       await bookSeats(numberOfSeats);
       toast.success("Booking successful! Your seats have been reserved.");
-    } catch (error: Error | any) {
-      toast.error(error.message || "Failed to book seats. Please try again.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("failed to book tickets.");
+      }
     }
   };
 
@@ -53,16 +47,18 @@ export default function BookingPage() {
     try {
       await cancelBooking(bookingId);
       toast.success("Booking cancelled successfully");
-    } catch (error: Error | any) {
-      toast.error(error.message || "Failed to cancel booking");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Fail to cancel booking.");
+      }
     }
   };
 
   const totalSeats = 80;
-  const bookedSeats = userBookings.reduce((total, booking) => {
-    return total + booking.seats.length;
-  }, 0);
-  const availableSeats = totalSeats - bookedSeats;
+  const totalBookedSeats = allBookedSeats.length;
+  const availableSeats = totalSeats - totalBookedSeats;
 
   return (
     <AuthGuard>
@@ -75,9 +71,11 @@ export default function BookingPage() {
             <div className="grid grid-cols-7 gap-2">
               {Array.from({ length: 80 }, (_, i) => {
                 const seatId = i + 1;
-                const isBooked = userBookings.some((booking: Booking) =>
+                const isBooked = allBookedSeats.includes(seatId);
+                const isUserBooked = userBookings.some((booking: Booking) =>
                   booking.seats.some(
-                    (seat: Seat) => seat.seat_number === seatId
+                    (seat: { seat_number: number }) =>
+                      seat.seat_number === seatId
                   )
                 );
 
@@ -86,8 +84,10 @@ export default function BookingPage() {
                     key={seatId}
                     variant="secondary"
                     className={`h-10 ${
-                      isBooked
+                      isUserBooked
                         ? "bg-yellow-400"
+                        : isBooked
+                        ? "bg-red-400"
                         : "bg-green-500 hover:bg-green-600"
                     }`}
                     disabled={isBooked}
@@ -116,7 +116,7 @@ export default function BookingPage() {
               Available: {availableSeats}
             </span>
             <span className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded">
-              Booked: {bookedSeats}
+              Booked: {totalBookedSeats}
             </span>
             <span className="px-4 py-2 bg-gray-100 text-gray-800 rounded">
               Total: {totalSeats}
@@ -144,7 +144,12 @@ export default function BookingPage() {
                   >
                     <p className="font-medium text-black">
                       Seats:{" "}
-                      {booking.seats.map((s: Seat) => s.seat_number).join(", ")}
+                      {booking.seats
+                        .map(
+                          (seat: { seat_number: number; row_number: number }) =>
+                            seat.seat_number
+                        )
+                        .join(", ")}
                     </p>
 
                     <p className="text-sm text-gray-600">

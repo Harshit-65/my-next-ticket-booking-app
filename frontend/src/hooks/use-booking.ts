@@ -1,28 +1,15 @@
 import { create } from "zustand";
 import { bookingService } from "@/services/booking";
-
-interface Seat {
-  id: number;
-  seat_number: number;
-  row_number: number;
-  is_booked: boolean;
-}
-
-interface Booking {
-  id: number;
-  seats: Array<{
-    seat_number: number;
-    row_number: number;
-  }>;
-  booking_time: string;
-}
+import { Seat, Booking } from "@/types/booking";
 
 interface BookingState {
-  availableSeats: any[];
-  userBookings: any[];
+  availableSeats: Seat[];
+  userBookings: Booking[];
+  allBookedSeats: number[];
   loading: boolean;
   totalSeats: number;
   bookedSeats: number;
+  loadAllBookedSeats: () => Promise<void>;
   loadAvailableSeats: () => Promise<void>;
   loadUserBookings: () => Promise<void>;
   bookSeats: (numberOfSeats: number) => Promise<void>;
@@ -32,6 +19,7 @@ interface BookingState {
 export const useBooking = create<BookingState>((set, get) => ({
   availableSeats: [],
   userBookings: [],
+  allBookedSeats: [],
   loading: false,
   totalSeats: 80,
   bookedSeats: 0,
@@ -51,6 +39,15 @@ export const useBooking = create<BookingState>((set, get) => ({
       set({ loading: false });
     }
   },
+  loadAllBookedSeats: async () => {
+    try {
+      const { data } = await bookingService.getAllBookedSeats();
+      // Assuming data is an array of seat IDs that are booked
+      set({ allBookedSeats: data });
+    } catch (error) {
+      console.error("Error loading all booked seats:", error);
+    }
+  },
 
   loadUserBookings: async () => {
     set({ loading: true });
@@ -66,11 +63,13 @@ export const useBooking = create<BookingState>((set, get) => ({
     await bookingService.bookSeats(numberOfSeats);
     await get().loadAvailableSeats();
     await get().loadUserBookings();
+    await get().loadAllBookedSeats();
   },
 
   cancelBooking: async (bookingId) => {
     await bookingService.cancelBooking(bookingId);
     await get().loadAvailableSeats();
     await get().loadUserBookings();
+    await get().loadAllBookedSeats();
   },
 }));

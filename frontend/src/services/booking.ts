@@ -34,4 +34,11 @@ export const bookingService = {
     });
     return response.data;
   },
+
+  async getAllBookedSeats() {
+    const response = await axios.get(`${API_URL}/bookings/seats/booked`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    return response.data;
+  },
 };

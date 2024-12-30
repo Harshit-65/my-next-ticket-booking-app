@@ -161,6 +161,33 @@ const bookingController = {
     }
   },
 
+  getAllBookedSeats: async (req, res) => {
+    try {
+      const query = `
+        SELECT DISTINCT s.seat_number
+        FROM seats s
+        JOIN booking_details bd ON s.id = bd.seat_id
+        JOIN bookings b ON bd.booking_id = b.id
+        WHERE b.status = 'active' AND s.is_booked = true
+        ORDER BY s.seat_number;
+      `;
+
+      const result = await pool.query(query);
+      const bookedSeats = result.rows.map((row) => row.seat_number);
+
+      res.json({
+        success: true,
+        data: bookedSeats,
+      });
+    } catch (error) {
+      console.error("Error getting booked seats:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error retrieving booked seats",
+      });
+    }
+  },
+
   cancelBooking: async (req, res) => {
     const client = await pool.connect();
     try {
