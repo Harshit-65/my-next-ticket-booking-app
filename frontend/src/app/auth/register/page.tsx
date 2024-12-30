@@ -52,8 +52,13 @@ export default function RegisterPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       router.push("/booking");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      // Change here: use 'unknown' instead of 'any'
+      if (err instanceof Error) {
+        setError(err.message); // Safely access the 'message' property if it's an instance of Error
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 

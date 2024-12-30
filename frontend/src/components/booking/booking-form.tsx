@@ -19,8 +19,8 @@ export const BookingForm = ({ onSubmit, isLoading }: BookingFormProps) => {
     try {
       validateNumberOfSeats(numberOfSeats);
       await onSubmit(numberOfSeats);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 

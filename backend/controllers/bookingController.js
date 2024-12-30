@@ -178,6 +178,7 @@ const bookingController = {
         throw new Error("Booking not found or unauthorized");
       }
 
+      // Get seats to free up
       const seatsToUpdate = await client.query(
         "SELECT seat_id FROM booking_details WHERE booking_id = $1",
         [id]
@@ -190,11 +191,17 @@ const bookingController = {
         ]);
       }
 
+      // Delete booking details first (due to foreign key constraint)
       await client.query("DELETE FROM booking_details WHERE booking_id = $1", [
         id,
       ]);
 
-      await client.query("DELETE FROM bookings WHERE id = $1", [id]);
+      // Delete the booking
+      // await client.query("DELETE FROM bookings WHERE id = $1", [id]);
+      await client.query(
+        "UPDATE bookings SET status = 'cancelled' WHERE id = $1",
+        [id]
+      );
 
       await client.query("COMMIT");
 

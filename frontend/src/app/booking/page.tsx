@@ -44,7 +44,7 @@ export default function BookingPage() {
     try {
       await bookSeats(numberOfSeats);
       toast.success("Booking successful! Your seats have been reserved.");
-    } catch (error: any) {
+    } catch (error: Error | any) {
       toast.error(error.message || "Failed to book seats. Please try again.");
     }
   };
@@ -53,7 +53,7 @@ export default function BookingPage() {
     try {
       await cancelBooking(bookingId);
       toast.success("Booking cancelled successfully");
-    } catch (error: any) {
+    } catch (error: Error | any) {
       toast.error(error.message || "Failed to cancel booking");
     }
   };

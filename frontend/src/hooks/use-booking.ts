@@ -1,6 +1,22 @@
 import { create } from "zustand";
 import { bookingService } from "@/services/booking";
 
+interface Seat {
+  id: number;
+  seat_number: number;
+  row_number: number;
+  is_booked: boolean;
+}
+
+interface Booking {
+  id: number;
+  seats: Array<{
+    seat_number: number;
+    row_number: number;
+  }>;
+  booking_time: string;
+}
+
 interface BookingState {
   availableSeats: any[];
   userBookings: any[];
@@ -17,7 +33,7 @@ export const useBooking = create<BookingState>((set, get) => ({
   availableSeats: [],
   userBookings: [],
   loading: false,
-  totalSeats: 80, // Total number of seats
+  totalSeats: 80,
   bookedSeats: 0,
 
   loadAvailableSeats: async () => {
