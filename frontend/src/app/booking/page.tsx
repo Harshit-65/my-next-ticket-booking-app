@@ -10,7 +10,7 @@ import { BookingForm } from "@/components/booking/booking-form";
 import { useBooking } from "@/hooks/use-booking";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/ui/navbar";
-import { Seat, Booking } from "@/types/booking";
+import { Booking } from "@/types/booking";
 
 export default function BookingPage() {
   const {
