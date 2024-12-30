@@ -92,6 +92,9 @@ This project is a train booking system built using **Next.js**, **Node.js**, **E
 - **Get User Bookings**:  
   `GET /api/bookings/user`
 
+- **Get Booked Seats**:
+  `GET /api/bookings/seats/booked`
+  
 - **Cancel Booking**:  
   `DELETE /api/bookings/:id`
 
@@ -157,6 +160,14 @@ This project is a train booking system built using **Next.js**, **Node.js**, **E
   Authorization: Bearer your_token_here
   ```
 
+### 6. Get Booked Seats
+
+- **Method**: `GET`
+- **URL**: `http://localhost:3001/api/bookings/seats/booked`
+- **Headers**:
+  ```
+  Authorization: Bearer your_token_here
+  ```
 ---
 
 ## Notes
