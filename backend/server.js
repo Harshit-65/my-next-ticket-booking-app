@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/bookings", authMiddleware, bookingRoutes); // Protected routes
+app.use("/api/bookings", authMiddleware, bookingRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

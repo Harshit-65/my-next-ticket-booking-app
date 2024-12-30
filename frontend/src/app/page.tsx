@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-      <h1 className="text-4xl font-bold mb-8">
+      <h1 className="text-4xl font-bold mb-8 text-slate-700 shadow-lg rounded">
         Welcome to Train Booking System
       </h1>
       <div className="space-x-4">

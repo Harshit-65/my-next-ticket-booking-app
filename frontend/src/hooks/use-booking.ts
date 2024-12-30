@@ -18,7 +18,7 @@ export const useBooking = create<BookingState>((set, get) => ({
   userBookings: [],
   loading: false,
   totalSeats: 80, // Total number of seats
-  bookedSeats: 0, // Initial booked seats
+  bookedSeats: 0,
 
   loadAvailableSeats: async () => {
     set({ loading: true });
@@ -26,7 +26,7 @@ export const useBooking = create<BookingState>((set, get) => ({
       const { data } = await bookingService.getAvailableSeats();
       set({ availableSeats: data });
 
-      // Calculate the booked seats
+      // Calculating the booked seats
       const bookedSeats = get().userBookings.reduce((total, booking) => {
         return total + booking.seats.length;
       }, 0);

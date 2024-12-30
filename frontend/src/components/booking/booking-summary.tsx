@@ -1,4 +1,3 @@
-// src/components/booking/booking-summary.tsx
 "use client";
 
 interface BookingSummaryProps {

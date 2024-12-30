@@ -1,6 +1,3 @@
-// src/components/booking/booking-form.tsx
-"use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +24,11 @@ export const BookingForm = ({ onSubmit, isLoading }: BookingFormProps) => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNumberOfSeats(value ? parseInt(value) : 0);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
@@ -38,7 +40,7 @@ export const BookingForm = ({ onSubmit, isLoading }: BookingFormProps) => {
           min={1}
           max={7}
           value={numberOfSeats}
-          onChange={(e) => setNumberOfSeats(parseInt(e.target.value))}
+          onChange={handleInputChange}
           className="mt-1"
           required
         />

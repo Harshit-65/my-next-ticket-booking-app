@@ -1,4 +1,3 @@
-// src/components/booking/booking-layout.tsx
 "use client";
 
 import { Card } from "@/components/ui/card";

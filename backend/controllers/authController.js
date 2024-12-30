@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 
 const authController = {
-  // Register a new user
   register: async (req, res) => {
     try {
       const { username, email, password } = req.body;
@@ -18,17 +17,14 @@ const authController = {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      // Hash password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Insert new user
       const newUser = await pool.query(
         "INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email",
         [username, email, hashedPassword]
       );
 
-      // Generate JWT token
       const token = jwt.sign(
         { id: newUser.rows[0].id },
         process.env.JWT_SECRET || "your-default-secret",
@@ -45,12 +41,10 @@ const authController = {
     }
   },
 
-  // Login user
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
 
-      // Check if user exists
       const user = await pool.query("SELECT * FROM users WHERE email = $1", [
         email,
       ]);
@@ -69,7 +63,6 @@ const authController = {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Generate JWT token
       const token = jwt.sign(
         { id: user.rows[0].id },
         process.env.JWT_SECRET || "your-default-secret",

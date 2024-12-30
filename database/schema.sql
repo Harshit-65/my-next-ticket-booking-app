@@ -12,7 +12,7 @@ CREATE TABLE seats (
     seat_number INTEGER NOT NULL,
     row_number INTEGER NOT NULL,
     is_booked BOOLEAN DEFAULT FALSE,
-    UNIQUE(seat_number, row_number)  -- This ensures unique combination of seat and row
+    UNIQUE(seat_number, row_number)  
 );
 
 

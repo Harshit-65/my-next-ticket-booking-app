@@ -1,4 +1,3 @@
-// src/lib/api.ts
 import axios from "axios";
 
 const API_URL = "http://localhost:3001/api";
@@ -47,7 +46,6 @@ interface BookingResponse {
   };
 }
 
-// API functions
 export const apiClient = {
   // Auth endpoints
   auth: {

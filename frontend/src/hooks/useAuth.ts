@@ -1,4 +1,3 @@
-// src/hooks/useAuth.ts
 import { create } from "zustand";
 import { apiClient } from "@/lib/api";
 

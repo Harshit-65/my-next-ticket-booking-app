@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable if your backend is on a different domain
   async rewrites() {
     return [
       {

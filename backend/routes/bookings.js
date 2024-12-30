@@ -6,7 +6,7 @@ const bookingController = require("../controllers/bookingController");
 router.post("/", bookingController.createBooking);
 
 // Get available seats
-router.get("/seats/available", bookingController.getAvailableSeats); // Add this new route
+router.get("/seats/available", bookingController.getAvailableSeats);
 
 // Get bookings for a user
 router.get("/user", bookingController.getUserBookings);

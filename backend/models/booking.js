@@ -1,4 +1,3 @@
-// models/booking.js
 const pool = require("../config/db");
 
 const bookingModel = {
@@ -11,7 +10,6 @@ const bookingModel = {
     const booking = await client.query(bookingQuery, [userId]);
     const bookingId = booking.rows[0].id;
 
-    // Insert booking details
     for (const seatId of seatIds) {
       await client.query(
         `INSERT INTO booking_details (booking_id, seat_id)
@@ -19,7 +17,6 @@ const bookingModel = {
         [bookingId, seatId]
       );
 
-      // Update seat status
       await client.query(
         `UPDATE seats SET is_booked = true
                  WHERE id = $1`,
@@ -50,14 +47,12 @@ const bookingModel = {
   },
 
   cancel: async (bookingId, client) => {
-    // Update booking status
     await client.query(
       `UPDATE bookings SET status = 'cancelled'
              WHERE id = $1`,
       [bookingId]
     );
 
-    // Get seats associated with this booking
     const seatsResult = await client.query(
       `SELECT seat_id FROM booking_details
              WHERE booking_id = $1`,

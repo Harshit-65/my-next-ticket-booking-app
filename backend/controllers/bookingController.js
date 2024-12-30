@@ -1,14 +1,12 @@
-// controllers/bookingController.js
 const pool = require("../config/db");
 const bookingModel = require("../models/booking");
 
 const bookingController = {
-  // Create a new booking
   createBooking: async (req, res) => {
     const client = await pool.connect();
     try {
       const { numberOfSeats } = req.body;
-      const userId = req.userId; // Set by auth middleware
+      const userId = req.userId;
 
       // Validate number of seats
       if (!numberOfSeats || numberOfSeats <= 0 || numberOfSeats > 7) {
@@ -19,7 +17,6 @@ const bookingController = {
 
       await client.query("BEGIN");
 
-      // First, try to find seats in a single row
       const singleRowQuery = `
                 SELECT row_number, array_agg(id) as seat_ids
                 FROM (
@@ -62,14 +59,12 @@ const bookingController = {
         selectedSeats = availableSeats.rows.map((seat) => seat.id);
       }
 
-      // Create booking
       const bookingResult = await client.query(
         "INSERT INTO bookings (user_id) VALUES ($1) RETURNING id",
         [userId]
       );
       const bookingId = bookingResult.rows[0].id;
 
-      // Create booking details and update seats
       for (const seatId of selectedSeats) {
         await client.query(
           "INSERT INTO booking_details (booking_id, seat_id) VALUES ($1, $2)",
@@ -80,7 +75,6 @@ const bookingController = {
         ]);
       }
 
-      // Get the booked seat details
       const bookedSeatsQuery = `
                 SELECT s.row_number, s.seat_number
                 FROM seats s
@@ -111,10 +105,6 @@ const bookingController = {
     }
   },
 
-  // Get available seats
-  // controllers/bookingController.js
-  // ... other code ...
-
   getAvailableSeats: async (req, res) => {
     try {
       const query = `
@@ -138,7 +128,6 @@ const bookingController = {
     }
   },
 
-  // Get user bookings
   getUserBookings: async (req, res) => {
     try {
       const userId = req.userId;
@@ -180,7 +169,6 @@ const bookingController = {
 
       await client.query("BEGIN");
 
-      // Verify booking belongs to user
       const bookingCheck = await client.query(
         "SELECT * FROM bookings WHERE id = $1 AND user_id = $2",
         [id, userId]
@@ -190,7 +178,6 @@ const bookingController = {
         throw new Error("Booking not found or unauthorized");
       }
 
-      // Get seats to free up
       const seatsToUpdate = await client.query(
         "SELECT seat_id FROM booking_details WHERE booking_id = $1",
         [id]
@@ -203,12 +190,10 @@ const bookingController = {
         ]);
       }
 
-      // Delete booking details first (due to foreign key constraint)
       await client.query("DELETE FROM booking_details WHERE booking_id = $1", [
         id,
       ]);
 
-      // Delete the booking
       await client.query("DELETE FROM bookings WHERE id = $1", [id]);
 
       await client.query("COMMIT");
