@@ -4,6 +4,16 @@
 
 This project is a train ticket booking system built using **Next.js**, **Node.js**, **Express.js**, and **PostgreSQL**. It allows users to register, log in, and book train seats. The system ensures that users can book up to 7 seats at a time, prioritizing booking seats in the same row.
 
+## Screenshots
+
+1. Ticket Booking Page
+
+![alt text](<Screenshot 2024-12-31 101400.png>)
+
+- Tickets booked by the current user (User 1) are highlighted in yellow.
+- Available (unbooked) tickets are displayed in green.
+- Tickets booked by other users (e.g., User 2, User 3) are shown in pink to User 1.
+
 ## Features
 
 - User registration and login
