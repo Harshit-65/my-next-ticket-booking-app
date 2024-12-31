@@ -31,16 +31,37 @@ This project is a train ticket booking system built using **Next.js**, **Node.js
 ### Backend Setup
 
 1. Navigate to the backend directory:
-
    ```
    cd backend
    ```
-
-2. Install dependencies:
+2. Create an `.env` file in the backend directory and add the following details:
+   ```
+   JWT_SECRET=silver9322
+   PORT=3001
+   ```
+3. Install dependencies:
    ```
    npm install
    ```
-3. Set up the database:
+4. Set up the database connection:  
+   Open `config/db.js` and configure PostgreSQL with the following:
+
+   ```javascript
+   const { Pool } = require("pg");
+   require("dotenv").config();
+
+   const pool = new Pool({
+     user: "postgres", // Replace with your PostgreSQL username
+     host: "localhost", // Replace with your host if different
+     database: "ticket_booking_db", // Database name
+     password: "silver9322", // Replace with your PostgreSQL password
+     port: 5432, // Default PostgreSQL port
+   });
+
+   module.exports = pool;
+   ```
+
+5. Initialize the database:
    - Ensure PostgreSQL is running.
    - Create a database named `ticket_booking_db`.
    - Run the database initialization script:
@@ -48,7 +69,7 @@ This project is a train ticket booking system built using **Next.js**, **Node.js
      node init-db.js //to create the tables as per schema
      node scripts/initializeSeats.js
      ```
-4. Start the backend server:
+6. Start the backend server:
    ```
    node server.js
    ```
@@ -66,6 +87,11 @@ This project is a train ticket booking system built using **Next.js**, **Node.js
 3. Start the frontend development server:
    ```
    npm run dev
+   ```
+   # OR
+   ```
+   npm run build
+   npm start
    ```
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -94,7 +120,6 @@ This project is a train ticket booking system built using **Next.js**, **Node.js
 
 - **Get Booked Seats**:
   `GET /api/bookings/seats/booked`
-  
 - **Cancel Booking**:  
   `DELETE /api/bookings/:id`
 
@@ -168,6 +193,7 @@ This project is a train ticket booking system built using **Next.js**, **Node.js
   ```
   Authorization: Bearer your_token_here
   ```
+
 ---
 
 ## Notes
