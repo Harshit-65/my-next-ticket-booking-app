@@ -62,7 +62,7 @@ export default function BookingPage() {
 
   return (
     <AuthGuard>
-      <Navbar /> {/* Use Navbar here */}
+      <Navbar /> {/*  Navbar here */}
       {/* <BookingLayout title="Train Seat Booking"> */}
       <div className="h-[calc(100vh-120px)] overflow-hidden flex gap-6 p-4 w-full">
         {/* Left Column - Seats Grid */}

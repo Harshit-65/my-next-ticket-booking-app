@@ -42,7 +42,7 @@ export const useBooking = create<BookingState>((set, get) => ({
   loadAllBookedSeats: async () => {
     try {
       const { data } = await bookingService.getAllBookedSeats();
-      // Assuming data is an array of seat IDs that are booked
+      // Assuming data is an array of seat iDs that are booked
       set({ allBookedSeats: data });
     } catch (error) {
       console.error("Error loading all booked seats:", error);
