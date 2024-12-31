@@ -1,4 +1,3 @@
-// src/types/booking.d.ts
 export interface Seat {
   id: number;
   seat_number: number;
