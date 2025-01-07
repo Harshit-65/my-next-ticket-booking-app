@@ -17,54 +17,110 @@ const bookingController = {
 
       await client.query("BEGIN");
 
+      // First try to find seats in a single row
       const singleRowQuery = `
-                SELECT row_number, array_agg(id) as seat_ids
-                FROM (
-                    SELECT id, row_number, seat_number
-                    FROM seats
-                    WHERE NOT is_booked
-                    ORDER BY row_number, seat_number
-                ) s
-                GROUP BY row_number
-                HAVING count(*) >= $1
-                ORDER BY row_number
-                LIMIT 1
-            `;
+        SELECT row_number, array_agg(id ORDER BY seat_number) as seat_ids
+        FROM (
+          SELECT id, row_number, seat_number
+          FROM seats
+          WHERE NOT is_booked
+          ORDER BY row_number, seat_number
+        ) s
+        GROUP BY row_number
+        HAVING count(*) >= $1
+        ORDER BY row_number
+        LIMIT 1
+      `;
 
-      const singleRowSeats = await client.query(singleRowQuery, [
+      const singleRowResult = await client.query(singleRowQuery, [
         numberOfSeats,
       ]);
 
-      let selectedSeats;
-      if (singleRowSeats.rows.length > 0) {
+      let selectedSeats = [];
+      if (singleRowResult.rows.length > 0) {
         // Found enough seats in a single row
-        selectedSeats = singleRowSeats.rows[0].seat_ids.slice(0, numberOfSeats);
+        selectedSeats = singleRowResult.rows[0].seat_ids.slice(
+          0,
+          numberOfSeats
+        );
       } else {
-        // If no single row has enough seats, find nearest available seats
-        const nearestSeatsQuery = `
-                    SELECT id, row_number, seat_number
-                    FROM seats
-                    WHERE NOT is_booked
-                    ORDER BY row_number, seat_number
-                    LIMIT $1
-                `;
-        const availableSeats = await client.query(nearestSeatsQuery, [
-          numberOfSeats,
-        ]);
+        // Get all available seats with their row information
+        const availableSeatsQuery = `
+          WITH AvailableSeats AS (
+            SELECT 
+              row_number,
+              array_agg(id ORDER BY seat_number) as seat_ids,
+              count(*) as available_seats
+            FROM seats
+            WHERE NOT is_booked
+            GROUP BY row_number
+            ORDER BY row_number
+          )
+          SELECT
+            row_number,
+            seat_ids,
+            available_seats,
+            LEAD(available_seats, 1, 0) OVER (ORDER BY row_number) as next_row_seats,
+            LEAD(seat_ids, 1, NULL) OVER (ORDER BY row_number) as next_row_seat_ids,
+            LEAD(row_number, 1, NULL) OVER (ORDER BY row_number) as next_row_number
+          FROM AvailableSeats
+        `;
 
-        if (availableSeats.rows.length < numberOfSeats) {
-          throw new Error("Not enough seats available");
+        const availableRows = await client.query(availableSeatsQuery);
+
+        // First, try to find consecutive rows with enough total seats
+        let bestConfiguration = null;
+        let minRowSpan = Infinity;
+
+        for (let i = 0; i < availableRows.rows.length - 1; i++) {
+          let currentSeats = [];
+          let seatsNeeded = numberOfSeats;
+          let startRow = i;
+          let rowSpan = 0;
+
+          while (seatsNeeded > 0 && startRow < availableRows.rows.length) {
+            const currentRow = availableRows.rows[startRow];
+            const seatsToTake = Math.min(
+              seatsNeeded,
+              currentRow.available_seats
+            );
+
+            currentSeats = currentSeats.concat(
+              currentRow.seat_ids.slice(0, seatsToTake)
+            );
+
+            seatsNeeded -= seatsToTake;
+            rowSpan =
+              availableRows.rows[startRow].row_number -
+              availableRows.rows[i].row_number;
+            startRow++;
+
+            if (seatsNeeded === 0 && rowSpan < minRowSpan) {
+              bestConfiguration = currentSeats;
+              minRowSpan = rowSpan;
+            }
+          }
         }
 
-        selectedSeats = availableSeats.rows.map((seat) => seat.id);
+        if (!bestConfiguration) {
+          throw new Error("Could not find suitable seat configuration");
+        }
+
+        selectedSeats = bestConfiguration;
       }
 
+      if (selectedSeats.length !== numberOfSeats) {
+        throw new Error("Could not allocate the requested number of seats");
+      }
+
+      // Create booking and book seats
       const bookingResult = await client.query(
         "INSERT INTO bookings (user_id) VALUES ($1) RETURNING id",
         [userId]
       );
       const bookingId = bookingResult.rows[0].id;
 
+      // Insert booking details and update seats
       for (const seatId of selectedSeats) {
         await client.query(
           "INSERT INTO booking_details (booking_id, seat_id) VALUES ($1, $2)",
@@ -75,12 +131,13 @@ const bookingController = {
         ]);
       }
 
+      // Get booked seats information
       const bookedSeatsQuery = `
-                SELECT s.row_number, s.seat_number
-                FROM seats s
-                WHERE s.id = ANY($1)
-                ORDER BY s.row_number, s.seat_number
-            `;
+        SELECT s.row_number, s.seat_number
+        FROM seats s
+        WHERE s.id = ANY($1)
+        ORDER BY s.row_number, s.seat_number
+      `;
       const bookedSeats = await client.query(bookedSeatsQuery, [selectedSeats]);
 
       await client.query("COMMIT");

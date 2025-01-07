@@ -27,7 +27,7 @@ const authController = {
 
       const token = jwt.sign(
         { id: newUser.rows[0].id },
-        process.env.JWT_SECRET || "your-default-secret",
+        process.env.JWT_SECRET || "secret",
         { expiresIn: "1d" }
       );
 
@@ -65,7 +65,7 @@ const authController = {
 
       const token = jwt.sign(
         { id: user.rows[0].id },
-        process.env.JWT_SECRET || "your-default-secret",
+        process.env.JWT_SECRET || "secret",
         { expiresIn: "1d" }
       );
 
